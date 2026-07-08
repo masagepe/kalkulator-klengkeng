@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Kelayakan Investasi Kebun Klengkeng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EAE6D6;
+    --paper-dim:#DFDAC6;
+    --ink:#20261F;
+    --ink-soft:#4A5245;
+    --canopy:#3B5A40;
+    --canopy-dark:#2A4130;
+    --husk:#8C5A2B;
+    --gold:#C79A2E;
+    --maroon:#6B2E28;
+    --rule:#B9B29A;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;
+    line-height:1.5;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:40px 24px 80px;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--husk);
+    border-bottom:1px solid var(--rule);
+    padding-bottom:10px;
+    margin-bottom:18px;
+    display:flex;
+    justify-content:space-between;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(28px,4vw,42px);
+    line-height:1.1;
+    margin:0 0 10px;
+    color:var(--canopy-dark);
+  }
+  .lede{
+    font-size:15.5px;
+    color:var(--ink-soft);
+    max-width:640px;
+    margin:0 0 36px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:28px;
+  }
+  @media(max-width:820px){.grid{grid-template-columns:1fr;}}
+
+  .panel{
+    background:var(--paper);
+    border:1px solid var(--rule);
+    position:relative;
+  }
+  .panel-head{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--paper);
+    background:var(--canopy);
+    padding:9px 16px;
+  }
+  .panel-body{padding:20px;}
+
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .field .hint{
+    font-size:11px;
+    color:var(--husk);
+    margin-top:4px;
+  }
+  .field input, .field select{
+    width:100%;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    padding:9px 10px;
+    background:#fff;
+    border:1px solid var(--rule);
+    color:var(--ink);
+  }
+  .field input:focus, .field select:focus{
+    outline:2px solid var(--canopy);
+    outline-offset:1px;
+  }
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  /* Ledger output */
+  .ledger-line{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:10px 0;
+    border-bottom:1px dashed var(--rule);
+    font-size:13.5px;
+  }
+  .ledger-line:last-child{border-bottom:none;}
+  .ledger-line .lbl{color:var(--ink-soft);}
+  .ledger-line .val{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:14.5px;
+  }
+  .ledger-line.big .val{
+    font-size:22px;
+    color:var(--canopy-dark);
+    font-family:'Fraunces',serif;
+    font-weight:600;
+  }
+  .ledger-line.warn .val{color:var(--maroon);}
+
+  .stamp{
+    display:inline-block;
+    margin-top:14px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:.06em;
+    padding:6px 10px;
+    border:1.5px solid var(--maroon);
+    color:var(--maroon);
+    transform:rotate(-1.2deg);
+  }
+  .stamp.ok{border-color:var(--canopy-dark);color:var(--canopy-dark);}
+
+  /* Timeline signature */
+  .timeline-wrap{margin-top:8px;padding:20px;border:1px solid var(--rule);}
+  .timeline-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:14px;
+  }
+  .track{display:flex;gap:3px;height:52px;align-items:flex-end;}
+  .year-block{
+    flex:1;
+    position:relative;
+    background:var(--paper-dim);
+    border-top:2px solid var(--rule);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    padding-bottom:4px;
+  }
+  .year-block .bar{
+    position:absolute;
+    bottom:0;left:0;right:0;
+    background:var(--canopy);
+    transition:height .25s ease;
+  }
+  .year-block .num{
+    position:relative;
+    z-index:2;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:var(--ink-soft);
+  }
+  .year-block.dormant .bar{background:var(--husk);opacity:.55;}
+  .year-block.breakeven{outline:2px solid var(--maroon);}
+  .year-labels{display:flex;gap:3px;margin-top:6px;}
+  .year-labels span{flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink-soft);}
+  .legend{display:flex;gap:18px;margin-top:12px;font-size:11px;color:var(--ink-soft);flex-wrap:wrap;}
+  .legend .dot{display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:middle;}
+
+  .note{
+    margin-top:32px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    border-left:2px solid var(--husk);
+    padding:10px 16px;
+    background:var(--paper-dim);
+  }
+
+  .footer-row{
+    margin-top:20px;
+    display:flex;
+    justify-content:space-between;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--rule);
+    padding-top:10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span>Kalkulator Kelayakan &mdash; Kebun Klengkeng</span><span id="today"></span></div>
+  <h1>Sebelum modal turun ke lahan,<br>lihat dulu angkanya.</h1>
+  <p class="lede">Masukkan variabel lahan dan asumsi biaya di bawah. Kalkulator ini menghitung modal awal, biaya operasional, proyeksi hasil, dan titik impas berdasarkan siklus produktif klengkeng yang butuh waktu 3&ndash;4 tahun sejak tanam.</p>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel-head">Data Lahan &amp; Asumsi</div>
+      <div class="panel-body">
+
+        <div class="field">
+          <label for="luas">Luas lahan (hektar)</label>
+          <input type="number" id="luas" value="1" min="0.1" step="0.1">
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="jarak">Pohon per hektar</label>
+            <input type="number" id="jarak" value="150" min="50" step="10">
+          </div>
+          <div class="field">
+            <label for="lokasi">Kondisi lokasi</label>
+            <select id="lokasi">
+              <option value="0.85">Dataran rendah</option>
+              <option value="0.70" selected>Dataran menengah</option>
+              <option value="0.50">Dataran tinggi</option>
+            </select>
+            <div class="hint">memengaruhi tingkat keberhasilan pembungaan</div>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="bibit">Harga bibit / pohon (Rp)</label>
+            <input type="number" id="bibit" value="75000" step="5000">
+          </div>
+          <div class="field">
+            <label for="tanam">Biaya tanam / pohon (Rp)</label>
+            <input type="number" id="tanam" value="25000" step="5000">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="infra">Infrastruktur awal / hektar &mdash; irigasi, akses jalan (Rp)</label>
+          <input type="number" id="infra" value="5000000" step="500000">
+        </div>
+
+        <div class="field">
+          <label for="opex">Biaya operasional / hektar / tahun (Rp)</label>
+          <input type="number" id="opex" value="15000000" step="500000">
+          <div class="hint">pupuk, pestisida, tenaga kerja rutin, perawatan pembungaan</div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="hasil">Hasil panen / pohon saat produktif penuh (kg)</label>
+            <input type="number" id="hasil" value="40" step="5">
+          </div>
+          <div class="field">
+            <label for="harga">Harga jual / kg (Rp)</label>
+            <input type="number" id="harga" value="25000" step="1000">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">Proyeksi Kelayakan</div>
+      <div class="panel-body">
+
+        <div class="ledger-line">
+          <span class="lbl">Total pohon</span>
+          <span class="val" id="o-pohon">&mdash;</span>
+        </div>
+        <div class="ledger-line">
+          <span class="lbl">Modal awal (tanam + infrastruktur)</span>
+          <span class="val" id="o-modal">&mdash;</span>
+        </div>
+        <div class="ledger-line">
+          <span class="lbl">Biaya operasional tahunan</span>
+          <span class="val" id="o-opex">&mdash;</span>
+        </div>
+        <div class="ledger-line">
+          <span class="lbl">Pendapatan tahunan saat produktif penuh</span>
+          <span class="val" id="o-pendapatan">&mdash;</span>
+        </div>
+        <div class="ledger-line big">
+          <span class="lbl">Titik impas (break even)</span>
+          <span class="val" id="o-breakeven">&mdash;</span>
+        </div>
+        <div class="ledger-line warn">
+          <span class="lbl">ROI kumulatif tahun ke-10</span>
+          <span class="val" id="o-roi">&mdash;</span>
+        </div>
+
+        <div id="o-stamp"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-wrap">
+    <div class="timeline-title">Arus kas 10 tahun &mdash; tahun tanam s.d. produktif penuh</div>
+    <div class="track" id="track"></div>
+    <div class="year-labels" id="yearLabels"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--husk);opacity:.55"></span>masa tunggu / defisit</span>
+      <span><span class="dot" style="background:var(--canopy)"></span>surplus kas</span>
+      <span><span class="dot" style="border:2px solid var(--maroon);width:5px;height:5px;"></span>tahun titik impas</span>
+    </div>
+  </div>
+
+  <div class="note">
+    Angka di atas dihitung dari asumsi yang bisa diedit sendiri sesuai data lapangan konsultan. Nilai bawaan (harga bibit, biaya operasional, tingkat keberhasilan pembungaan) adalah estimasi awal untuk simulasi, bukan angka final. Sebelum dipakai untuk keputusan investasi, sebaiknya divalidasi lewat survei lahan langsung, karena hasil panen klengkeng sangat dipengaruhi kondisi iklim mikro dan riwayat perawatan kebun sekitar.
+  </div>
+
+  <div class="footer-row">
+    <span>Kalkulator kelayakan investasi &mdash; kebun klengkeng</span>
+    <span>Model internal, disesuaikan per lokasi lahan</span>
+  </div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+document.getElementById('today').textContent = new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+
+function rupiah(n){
+  const sign = n < 0 ? '-' : '';
+  return sign + 'Rp ' + Math.round(Math.abs(n)).toLocaleString('id-ID');
+}
+
+// ramp-up produktivitas per tahun sejak tanam (tahun 1 = baru tanam)
+const ramp = {1:0, 2:0, 3:0, 4:0.3, 5:0.65, 6:1, 7:1, 8:1, 9:1, 10:1};
+
+function hitung(){
+  const luas = parseFloat($('luas').value) || 0;
+  const pohonPerHa = parseFloat($('jarak').value) || 0;
+  const successRate = parseFloat($('lokasi').value);
+  const hargaBibit = parseFloat($('bibit').value) || 0;
+  const biayaTanam = parseFloat($('tanam').value) || 0;
+  const infraPerHa = parseFloat($('infra').value) || 0;
+  const opexPerHa = parseFloat($('opex').value) || 0;
+  const hasilPerPohon = parseFloat($('hasil').value) || 0;
+  const hargaJual = parseFloat($('harga').value) || 0;
+
+  const totalPohon = luas * pohonPerHa;
+  const modalAwal = totalPohon * (hargaBibit + biayaTanam) + luas * infraPerHa;
+  const opexTahunan = luas * opexPerHa;
+  const pendapatanPenuh = totalPohon * hasilPerPohon * successRate * hargaJual;
+
+  $('o-pohon').textContent = totalPohon.toLocaleString('id-ID') + ' pohon';
+  $('o-modal').textContent = rupiah(modalAwal);
+  $('o-opex').textContent = rupiah(opexTahunan) + ' / tahun';
+  $('o-pendapatan').textContent = rupiah(pendapatanPenuh) + ' / tahun';
+
+  // arus kas kumulatif 10 tahun
+  let kumulatif = -modalAwal;
+  let breakEvenYear = null;
+  const yearly = [];
+  for(let t=1; t<=10; t++){
+    const pendapatan = pendapatanPenuh * ramp[t];
+    const arus = pendapatan - opexTahunan;
+    kumulatif += arus;
+    yearly.push({t, arus, kumulatif});
+    if(breakEvenYear === null && kumulatif >= 0) breakEvenYear = t;
+  }
+
+  $('o-breakeven').textContent = breakEvenYear ? ('Tahun ke-' + breakEvenYear) : 'Belum tercapai dalam 10 tahun';
+  const roi10 = modalAwal > 0 ? (kumulatif / modalAwal) * 100 : 0;
+  $('o-roi').textContent = roi10.toFixed(0) + '%';
+
+  const stampEl = $('o-stamp');
+  if(breakEvenYear && breakEvenYear <= 6){
+    stampEl.innerHTML = '<span class="stamp ok">LAYAK DIPERTIMBANGKAN</span>';
+  } else if(breakEvenYear){
+    stampEl.innerHTML = '<span class="stamp">PERLU KAJIAN LEBIH LANJUT</span>';
+  } else {
+    stampEl.innerHTML = '<span class="stamp">RISIKO TINGGI &mdash; TIDAK BALIK MODAL</span>';
+  }
+
+  renderTimeline(yearly, breakEvenYear);
+}
+
+function renderTimeline(yearly, breakEvenYear){
+  const track = $('track');
+  const labels = $('yearLabels');
+  track.innerHTML = '';
+  labels.innerHTML = '';
+
+  const maxAbs = Math.max(...yearly.map(y => Math.abs(y.arus)), 1);
+
+  yearly.forEach(y => {
+    const block = document.createElement('div');
+    block.className = 'year-block' + (y.arus < 0 ? ' dormant' : '') + (y.t === breakEvenYear ? ' breakeven' : '');
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const heightPct = Math.max(6, Math.abs(y.arus) / maxAbs * 100);
+    bar.style.height = heightPct + '%';
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = (y.arus/1000000).toFixed(0)+'jt';
+    block.appendChild(bar);
+    block.appendChild(num);
+    track.appendChild(block);
+
+    const lbl = document.createElement('span');
+    lbl.textContent = 'T' + y.t;
+    labels.appendChild(lbl);
+  });
+}
+
+document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', hitung));
+hitung();
+</script>
+</body>
+</html>
