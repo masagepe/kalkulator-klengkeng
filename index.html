@@ -210,7 +210,7 @@
 
   <div class="eyebrow"><span>Kalkulator Kelayakan &mdash; Kebun Klengkeng</span><span id="today"></span></div>
   <h1>Sebelum modal turun ke lahan,<br>lihat dulu angkanya.</h1>
-  <p class="lede">Masukkan variabel lahan dan asumsi biaya di bawah. Kalkulator ini menghitung modal awal, biaya operasional, proyeksi hasil, dan titik impas berdasarkan siklus produktif klengkeng yang butuh waktu 3&ndash;4 tahun sejak tanam.</p>
+  <p class="lede">Masukkan variabel lahan dan asumsi biaya di bawah. Kalkulator ini menghitung modal awal, biaya operasional, proyeksi hasil, dan titik impas berdasarkan siklus produktif klengkeng dari bibit vegetatif, mulai berbuah tahun ke-3, produktif penuh sekitar tahun ke-7&ndash;8.</p>
 
   <div class="grid">
     <div class="panel">
@@ -341,7 +341,9 @@ function rupiah(n){
 }
 
 // ramp-up produktivitas per tahun sejak tanam (tahun 1 = baru tanam)
-const ramp = {1:0, 2:0, 3:0, 4:0.3, 5:0.65, 6:1, 7:1, 8:1, 9:1, 10:1};
+// bibit vegetatif (cangkok/okulasi/sambung pucuk) mulai berbuah tahun ke-3,
+// produktivitas optimal dicapai bertahap hingga tahun ke-8
+const ramp = {1:0, 2:0, 3:0.15, 4:0.35, 5:0.6, 6:0.85, 7:1, 8:1, 9:1, 10:1};
 
 function hitung(){
   const luas = parseFloat($('luas').value) || 0;
